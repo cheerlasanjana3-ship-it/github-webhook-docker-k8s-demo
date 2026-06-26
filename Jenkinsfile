@@ -32,15 +32,13 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-            steps {
-                echo 'Deploying application to Minikube Kubernetes'
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
-                echo 'Restarting deployment to pick up new image'
-                sh 'kubectl rollout restart deployment/$K8S_DEPLOYMENT'
-                sh 'kubectl rollout status deployment/$K8S_DEPLOYMENT'
-            }
-        }
+    steps {
+        sh 'sed -i "s|image: cicd-webapp:.*|image: cicd-webapp:$IMAGE_TAG|g" deployment.yaml'
+        sh 'kubectl apply -f deployment.yaml'
+        sh 'kubectl rollout restart deployment/$K8S_DEPLOYMENT'
+        sh 'kubectl rollout status deployment/$K8S_DEPLOYMENT'
+    }
+}
 
         stage('Verify Deployment') {
             steps {
